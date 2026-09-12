@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A client-grouped machine-learning study of organic search traffic decline and content refresh prioritization.">
+<title>Predicting Organic Search Decay for Content Refresh Prioritization</title>
+<style>
+:root{--bg:#f7f8fa;--ink:#17202a;--muted:#5f6b76;--card:#fff;--line:#dfe4e8;--accent:#1f5eff;--accent2:#e9efff;--good:#126b45;--warn:#8a5a00;--max:980px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+header{background:linear-gradient(135deg,#101827,#1d2b45);color:#fff;padding:72px 20px 58px}
+.hero{max-width:var(--max);margin:auto}.eyebrow{font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;opacity:.72;font-weight:700}
+h1{font-size:clamp(2.25rem,6vw,4.5rem);line-height:1.02;letter-spacing:-.045em;max-width:900px;margin:14px 0 22px}
+.deck{font-size:1.2rem;max-width:760px;color:#dce5f3}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.pill{padding:7px 11px;border:1px solid #52627a;border-radius:999px;color:#eaf0f8;font-size:.88rem}
+nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);overflow:auto}
+.navinner{max-width:var(--max);margin:auto;display:flex;gap:18px;padding:11px 20px;white-space:nowrap;font-size:.9rem}
+main{max-width:var(--max);margin:auto;padding:28px 20px 80px}
+section{padding:44px 0;border-bottom:1px solid var(--line)}section:last-child{border-bottom:0}
+h2{font-size:1.8rem;letter-spacing:-.025em;margin:0 0 18px}h3{margin-top:28px}
+p{margin:0 0 15px}.lead{font-size:1.12rem}
+.cardgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 4px 18px rgba(16,24,40,.04)}
+.metric{font-size:2.15rem;font-weight:800;letter-spacing:-.04em}.label{color:var(--muted);font-size:.9rem}
+.callout{background:var(--accent2);border-left:4px solid var(--accent);padding:18px 20px;border-radius:8px;margin:22px 0}
+.warning{background:#fff7e8;border-left:4px solid #c58b22}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0;font-size:.94rem}
+th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f1f4f7;font-weight:750}tr:last-child td{border-bottom:0}
+.chart{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin:24px 0}.chart h3{margin:0 0 15px}
+.barrow{display:grid;grid-template-columns:180px 1fr 65px;gap:12px;align-items:center;margin:13px 0}.bar{height:28px;background:#e7ebf0;border-radius:7px;overflow:hidden}.fill{height:100%;background:#1f5eff;border-radius:7px}.fill.base{background:#7b8794}
+.note{font-size:.88rem;color:var(--muted);margin-top:12px}
+ol.recs{counter-reset:item;list-style:none;padding:0}.recs li{counter-increment:item;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 20px 20px 64px;margin:12px 0;position:relative}.recs li:before{content:counter(item);position:absolute;left:18px;top:17px;width:32px;height:32px;border-radius:50%;background:#e9efff;color:#1746ba;display:grid;place-items:center;font-weight:800}
+code{background:#eef1f4;padding:2px 6px;border-radius:5px;font-size:.9em}pre{background:#101827;color:#e8eef7;padding:18px;border-radius:12px;overflow:auto}
+footer{background:#101827;color:#dce5f3;padding:42px 20px}.foot{max-width:var(--max);margin:auto}.muted{color:var(--muted)}
+@media(max-width:760px){.cardgrid{grid-template-columns:1fr}.barrow{grid-template-columns:1fr;gap:5px}.bar{height:22px}header{padding-top:50px}.navinner{gap:12px}}
+</style>
+</head>
+<body>
+<header>
+<div class="hero">
+<div class="eyebrow">FlyRank ML Internship · Capstone Research Artifact</div>
+<h1>Predicting Organic Search Decay for Content Refresh Prioritization</h1>
+<p class="deck">A decision-support study comparing a client-grouped gradient-boosted model with a transparent staleness heuristic for ranking pages that deserve editorial review first.</p>
+<div class="meta"><span class="pill">30,000-page anonymized starter release</span><span class="pill">Client-grouped 80/20 validation</span><span class="pill">Precision@50 + ROC-AUC</span></div>
+</div>
+</header>
+<nav><div class="navinner">
+<a href="#abstract">Abstract</a><a href="#problem">Problem</a><a href="#data">Data</a><a href="#method">Methodology</a><a href="#results">Results</a><a href="#limits">Limitations</a><a href="#recommendations">Recommendations</a><a href="#repro">Reproducibility</a>
+</div></nav>
+
+<main>
+<section id="abstract">
+<h2>Abstract</h2>
+<p class="lead">Can historical search-performance and freshness signals identify content pages that are currently showing organic traffic decline well enough to prioritize editorial review? Using the repository's 30,000-row anonymized <code>content_refresh_anonymized.csv</code> starter release, I constructed an eight-feature representation from 90-day search metrics, content age, update recency, and word count. A <code>HistGradientBoostingClassifier</code> was evaluated with an 80/20 client-grouped split so pages from the same client domain did not appear on both sides of validation, and it was compared with the <code>HIGH_IMP_STALE</code> heuristic baseline. On the recorded validation run, the model achieved 94.0% Precision@50 and ROC-AUC 0.7808, versus 66.0% Precision@50 for the heuristic. The result supports using the model as a ranked editorial-review aid—not as evidence that refreshing a flagged page will cause traffic recovery.</p>
+</section>
+
+<section id="problem">
+<h2>1. Introduction / Problem statement</h2>
+<p>Editorial teams rarely have enough time to review every page whose organic performance may be weakening. A simple rule such as “high impressions + very old content” is easy to explain, but it can miss interactions between freshness, search visibility, click-through rate, content age, and page size.</p>
+<p>The decision this project supports is therefore narrow: <strong>which pages should a content team inspect first?</strong> The output is a ranked review queue. It is not an automated editing system and it does not attempt to predict Google's ranking algorithm.</p>
+<div class="callout"><strong>Research question.</strong> Can historical search-performance metrics and temporal freshness indicators accurately rank pages associated with the <code>trend_direction == "down"</code> outcome, while generalizing across unseen client domains?</div>
+</section>
+
+<section id="data">
+<h2>2. Data</h2>
+<p>The executed capstone notebook uses <code>data/raw/content_refresh_anonymized.csv</code>, a 30,000-page anonymized starter release. The repository separately documents a much larger FlyRank warehouse release; that warehouse contains 78,835,655 daily performance rows, but those rows are <strong>not</strong> the dataset used for the metrics reported on this page. This distinction is intentional: the paper does not claim to have modeled the 79M-row warehouse when the recorded capstone run modeled the 30K starter slice.</p>
+
+<table>
+<tr><th>Item</th><th>Paper scope</th></tr>
+<tr><td>Release used for reported results</td><td><code>content_refresh_anonymized.csv</code></td></tr>
+<tr><td>Rows / pages</td><td>30,000</td></tr>
+<tr><td>Search observation window</td><td>90-day aggregate metrics</td></tr>
+<tr><td>Core search fields</td><td>impressions, clicks, average position, CTR</td></tr>
+<tr><td>Lifecycle fields</td><td>days since last update, content age</td></tr>
+<tr><td>Other content signal</td><td>word count</td></tr>
+<tr><td>Label</td><td><code>trend_direction == "down"</code></td></tr>
+<tr><td>Public-safety boundary</td><td>URLs and client domains are anonymized hashes; no raw queries or client names are published</td></tr>
+</table>
+
+<h3>Exclusions</h3>
+<ul>
+<li><code>trend_direction</code> is excluded from the feature matrix because it defines the target.</li>
+<li><code>search_volume</code> is excluded in the notebook because its recorded correlation with observed page traffic was negligible (approximately <code>r = 0.001</code>).</li>
+<li>Identifier hashes are used for grouping, not as predictive features.</li>
+</ul>
+
+<div class="callout warning"><strong>Important scope note.</strong> The assignment brief describes the full FlyRank warehouse as roughly 79M rows. The current capstone notebook's executed analysis is on 30,000 anonymized pages. The paper preserves that limitation rather than silently upgrading the sample to a claim about the full warehouse.</div>
+</section>
+
+<section id="method">
+<h2>3. Methodology</h2>
+<h3>Features</h3>
+<p>The model uses eight features: <code>content_age_days</code>, <code>days_since_last_update</code>, <code>impressions_90d</code>, <code>avg_position</code>, <code>ctr</code>, <code>word_count</code>, a bounded <code>staleness_ratio</code>, and <code>log_impressions</code>. Missing feature values are median-filled after feature selection.</p>
+
+<h3>Label definition</h3>
+<p>The target is <code>is_declining_label = trend_direction == "down"</code>. The notebook reports a 54.21% decline base rate in the 30,000-page dataset.</p>
+
+<h3>Model and baseline</h3>
+<p>The learned model is scikit-learn's <code>HistGradientBoostingClassifier</code>. The baseline is the transparent <code>HIGH_IMP_STALE</code> rule: a page qualifies when <code>impressions_90d ≥ 500</code> and <code>days_since_last_update ≥ 180</code>.</p>
+
+<h3>Validation design</h3>
+<p>The notebook uses <code>GroupShuffleSplit</code> with <code>test_size=0.2</code> and <code>random_state=42</code>, grouping by <code>client_hash_id</code>. This keeps a client's pages together and tests whether the model can rank pages for client domains it did not train on.</p>
+
+<h3>Leakage checks and boundaries</h3>
+<p>The target column is excluded from the feature matrix, identifiers are used only for grouping, and the split is client-grouped. The analysis does not claim a causal effect because the label is an observed/proxy outcome rather than the result of a controlled refresh experiment.</p>
+</section>
+
+<section id="results">
+<h2>4. Results</h2>
+<div class="cardgrid">
+<div class="card"><div class="metric">94.0%</div><div class="label">Model Precision@50</div></div>
+<div class="card"><div class="metric">66.0%</div><div class="label">Baseline Precision@50</div></div>
+<div class="card"><div class="metric">0.7808</div><div class="label">Model ROC-AUC</div></div>
+</div>
+
+<div class="chart">
+<h3>Precision@50 — same validation split</h3>
+<div class="barrow"><strong>GBDT model</strong><div class="bar"><div class="fill" style="width:94%"></div></div><strong>94%</strong></div>
+<div class="barrow"><strong>Heuristic baseline</strong><div class="bar"><div class="fill base" style="width:66%"></div></div><strong>66%</strong></div>
+<p class="note">Takeaway: in the recorded validation run, the model placed a substantially larger share of declining pages in its top-50 review queue than the heuristic.</p>
+</div>
+
+<table>
+<tr><th>Approach</th><th>Precision@50</th><th>ROC-AUC</th></tr>
+<tr><td>Heuristic Rule Baseline (HIGH_IMP_STALE)</td><td>66.0%</td><td>N/A — rule score</td></tr>
+<tr><td><strong>Capstone ML Model (GBDT)</strong></td><td><strong>94.0%</strong></td><td><strong>0.7808</strong></td></tr>
+</table>
+
+<p>The difference is 28 percentage points of Precision@50 in this recorded grouped validation run. That is a measured ranking improvement on this dataset and split; it is not evidence that the model causes better traffic outcomes after a refresh.</p>
+</section>
+
+<section id="limits">
+<h2>5. Limitations &amp; honest framing</h2>
+<ul>
+<li><strong>Proxy label.</strong> The target is the observed <code>trend_direction</code> field in the starter dataset, not a future-window traffic decline. It is therefore weaker than a truly forward-looking prediction target.</li>
+<li><strong>Cross-sectional starter scope.</strong> The reported experiment uses 30,000 anonymized page records, not the full 78.8M-row daily warehouse.</li>
+<li><strong>Non-causal evidence.</strong> A high model score means a page resembles pages associated with the decline label. It does not show that editing the page will restore traffic.</li>
+<li><strong>Seasonality.</strong> Expected seasonal demand changes can look like deterioration and may create false positives.</li>
+<li><strong>Top-3 protection.</strong> The notebook identifies 91 validation pages with model probability ≥0.70 and average position ≤3.0; these should be routed to human review rather than automated editing.</li>
+<li><strong>Single split.</strong> The reported validation uses one grouped 80/20 split. Repeated grouped cross-validation or a time-based forward holdout would provide stronger evidence.</li>
+</ul>
+<div class="callout"><strong>Claim boundary:</strong> the strongest defensible statement is that this model <em>ranked/flagged</em> the recorded decline label better than the heuristic on the reported client-grouped validation split.</div>
+</section>
+
+<section id="recommendations">
+<h2>6. Ranked recommendations</h2>
+<ol class="recs">
+<li><strong>Use the model as a review queue, not an auto-editor.</strong> Start with pages at <code>P ≥ 0.70</code> and have an editor confirm the reason for decline before changing content.</li>
+<li><strong>Protect strong rankings.</strong> Pages at positions 1–3 should receive human review even when the model flags them. Avoid treating a statistical flag as permission to disrupt an already strong placement.</li>
+<li><strong>Separate urgent review from monitoring.</strong> Use <code>REFRESH_URGENT</code> for <code>P ≥ 0.70</code>, <code>MONITOR_RANK</code> for <code>0.45 ≤ P &lt; 0.70</code>, and <code>NO_ACTION_HEALTHY</code> below 0.45.</li>
+<li><strong>Keep the heuristic as a sanity check.</strong> The rule is transparent and useful for detecting surprising model behavior. A production queue should monitor where the model and rule disagree.</li>
+<li><strong>Upgrade the target before productionizing.</strong> The next research iteration should define features from a prior window and predict decline in a clearly separated future window, with time-aware validation.</li>
+</ol>
+
+<table>
+<tr><th>Action</th><th>Recorded full-dataset distribution</th></tr>
+<tr><td>REFRESH_URGENT (P ≥ 0.70)</td><td>8,549</td></tr>
+<tr><td>MONITOR_RANK (0.45 ≤ P &lt; 0.70)</td><td>11,948</td></tr>
+<tr><td>NO_ACTION_HEALTHY (P &lt; 0.45)</td><td>9,503</td></tr>
+</table>
+<p class="note">These counts come from applying the recorded model to the 30,000-page starter dataset; they are not estimates for the 79M-row warehouse.</p>
+</section>
+
+<section id="repro">
+<h2>7. Reproducibility</h2>
+<p>The capstone notebook contains the research question, feature construction, grouped split, model training, baseline comparison, limitations, action thresholds, and ranked-queue export.</p>
+<ul>
+<li><a href="https://github.com/madihakomal75/flyrank-ml-internship/blob/main/work/notebooks/capstone.ipynb">Capstone notebook</a></li>
+<li><a href="https://github.com/madihakomal75/flyrank-ml-internship">Repository</a></li>
+<li>Model seed: <code>random_state=42</code></li>
+<li>Split: <code>GroupShuffleSplit</code>, 80/20, grouped by <code>client_hash_id</code></li>
+<li>Output artifact described by the notebook: <code>work/outputs/capstone_ranked_queue.csv</code></li>
+</ul>
+</section>
+
+<section>
+<h2>8. Acknowledgments &amp; data credit</h2>
+<p>Built on the <strong><a href="https://flyrank.ai">FlyRank ML Internship dataset</a></strong>. The data used in this public artifact is anonymized; no client names, raw URLs, raw queries, or private credentials are published.</p>
+</section>
+</main>
+
+<footer><div class="foot">
+<strong>FlyRank ML Internship · Capstone</strong>
+<p class="muted">A public research artifact. Claims are intentionally limited to what the recorded analysis supports.</p>
+</div></footer>
+</body>
+</html>
